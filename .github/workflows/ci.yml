@@ -1,0 +1,78 @@
+name: iOS CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'foundation/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+          swift --version
+
+      - name: Select available iPhone simulator
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          udid="$(xcrun simctl list devices available --json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)
+          candidates = []
+          for runtime, devices in data["devices"].items():
+              if "iOS" not in runtime:
+                  continue
+              for device in devices:
+                  if device.get("isAvailable") and device["name"].startswith("iPhone"):
+                      candidates.append((runtime, device["name"], device["udid"]))
+          if not candidates:
+              raise SystemExit("No available iPhone simulator found")
+          print(sorted(candidates)[-1][2])
+          ' )"
+          echo "destination=platform=iOS Simulator,id=${udid}" >> "$GITHUB_OUTPUT"
+
+      - name: Test debug configuration
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project IOSFoundation.xcodeproj \
+            -scheme IOSFoundation \
+            -configuration Debug \
+            -destination '${{ steps.simulator.outputs.destination }}' \
+            -enableCodeCoverage YES \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: Build release configuration
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project IOSFoundation.xcodeproj \
+            -scheme IOSFoundation \
+            -configuration Release \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
+            GCC_TREAT_WARNINGS_AS_ERRORS=YES
