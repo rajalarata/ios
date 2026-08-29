@@ -209,7 +209,7 @@ private struct MatterDetailView: View {
                 showingImportError = true
             }
         }
-        .sheet(isPresented: $showingEvidenceEditor, onDismiss: { pendingImport = nil }) {
+        .sheet(isPresented: $showingEvidenceEditor) {
             EvidenceEditorSheet(
                 matter: matter,
                 importResult: pendingImport,

@@ -104,12 +104,12 @@ struct EvidenceEditorSheet: View {
     private func save() {
         var storedPath = importResult?.storedRelativePath
         var duplicateID: UUID?
-        if let imported = importResult,
-           let duplicate = existingEvidence.first(where: { $0.sha256 == imported.sha256 })
-        {
-            EvidenceFileStore.removeImported(relativePath: imported.storedRelativePath)
-            storedPath = duplicate.storedRelativePath
-            duplicateID = duplicate.id
+        if let imported = importResult {
+            if let duplicate = existingEvidence.first(where: { $0.sha256 == imported.sha256 }) {
+                EvidenceFileStore.removeImported(relativePath: imported.storedRelativePath)
+                storedPath = duplicate.storedRelativePath
+                duplicateID = duplicate.id
+            }
         }
 
         modelContext.insert(
