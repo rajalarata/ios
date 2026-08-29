@@ -12,6 +12,14 @@
 		300000000000000000000003 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* AppEnvironment.swift */; };
 		300000000000000000000004 /* AppEnvironmentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* AppEnvironmentTests.swift */; };
 		300000000000000000000005 /* IOSFoundationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* IOSFoundationUITests.swift */; };
+		300000000000000000000006 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* AppContainer.swift */; };
+		300000000000000000000007 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* AppConfiguration.swift */; };
+		300000000000000000000008 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* AppError.swift */; };
+		300000000000000000000009 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000009 /* AppLogger.swift */; };
+		300000000000000000000010 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000010 /* HTTPClient.swift */; };
+		300000000000000000000011 /* KeyValueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000011 /* KeyValueStore.swift */; };
+		300000000000000000000012 /* FoundationStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000012 /* FoundationStatusView.swift */; };
+		300000000000000000000013 /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000013 /* AppConfigurationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +45,17 @@
 		200000000000000000000003 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		200000000000000000000004 /* AppEnvironmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironmentTests.swift; sourceTree = "<group>"; };
 		200000000000000000000005 /* IOSFoundationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOSFoundationUITests.swift; sourceTree = "<group>"; };
+		200000000000000000000006 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+		200000000000000000000007 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		200000000000000000000008 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		200000000000000000000009 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		200000000000000000000010 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		200000000000000000000011 /* KeyValueStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueStore.swift; sourceTree = "<group>"; };
+		200000000000000000000012 /* FoundationStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoundationStatusView.swift; sourceTree = "<group>"; };
+		200000000000000000000013 /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
+		200000000000000000000020 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		200000000000000000000021 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		200000000000000000000022 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		200000000000000000000101 /* IOSFoundation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IOSFoundation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000102 /* IOSFoundationTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IOSFoundationTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		200000000000000000000103 /* IOSFoundationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IOSFoundationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,6 +71,7 @@
 		100000000000000000000002 = {
 			isa = PBXGroup;
 			children = (
+				100000000000000000000007 /* Configuration */,
 				100000000000000000000004 /* IOSFoundation */,
 				100000000000000000000005 /* IOSFoundationTests */,
 				100000000000000000000006 /* IOSFoundationUITests */,
@@ -72,9 +92,11 @@
 		100000000000000000000004 /* IOSFoundation */ = {
 			isa = PBXGroup;
 			children = (
-				200000000000000000000001 /* IOSFoundationApp.swift */,
-				200000000000000000000002 /* RootView.swift */,
-				200000000000000000000003 /* AppEnvironment.swift */,
+				100000000000000000000008 /* App */,
+				100000000000000000000009 /* Core */,
+				100000000000000000000010 /* Features */,
+				100000000000000000000011 /* Services */,
+				100000000000000000000012 /* Resources */,
 			);
 			path = IOSFoundation;
 			sourceTree = "<group>";
@@ -83,6 +105,7 @@
 			isa = PBXGroup;
 			children = (
 				200000000000000000000004 /* AppEnvironmentTests.swift */,
+				200000000000000000000013 /* AppConfigurationTests.swift */,
 			);
 			path = IOSFoundationTests;
 			sourceTree = "<group>";
@@ -95,6 +118,61 @@
 			path = IOSFoundationUITests;
 			sourceTree = "<group>";
 		};
+		100000000000000000000007 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000020 /* Base.xcconfig */,
+				200000000000000000000021 /* Debug.xcconfig */,
+				200000000000000000000022 /* Release.xcconfig */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		100000000000000000000008 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* IOSFoundationApp.swift */,
+				200000000000000000000002 /* RootView.swift */,
+				200000000000000000000003 /* AppEnvironment.swift */,
+				200000000000000000000006 /* AppContainer.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		100000000000000000000009 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000013 /* Configuration */,
+				100000000000000000000014 /* Errors */,
+				100000000000000000000015 /* Logging */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		100000000000000000000010 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000016 /* FoundationStatus */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		100000000000000000000011 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				100000000000000000000017 /* Networking */,
+				100000000000000000000018 /* Persistence */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		100000000000000000000012 /* Resources */ = {isa = PBXGroup; children = (); path = Resources; sourceTree = "<group>"; };
+		100000000000000000000013 /* Configuration */ = {isa = PBXGroup; children = (200000000000000000000007 /* AppConfiguration.swift */); path = Configuration; sourceTree = "<group>"; };
+		100000000000000000000014 /* Errors */ = {isa = PBXGroup; children = (200000000000000000000008 /* AppError.swift */); path = Errors; sourceTree = "<group>"; };
+		100000000000000000000015 /* Logging */ = {isa = PBXGroup; children = (200000000000000000000009 /* AppLogger.swift */); path = Logging; sourceTree = "<group>"; };
+		100000000000000000000016 /* FoundationStatus */ = {isa = PBXGroup; children = (200000000000000000000012 /* FoundationStatusView.swift */); path = FoundationStatus; sourceTree = "<group>"; };
+		100000000000000000000017 /* Networking */ = {isa = PBXGroup; children = (200000000000000000000010 /* HTTPClient.swift */); path = Networking; sourceTree = "<group>"; };
+		100000000000000000000018 /* Persistence */ = {isa = PBXGroup; children = (200000000000000000000011 /* KeyValueStore.swift */); path = Persistence; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -193,19 +271,31 @@
 				300000000000000000000001 /* IOSFoundationApp.swift in Sources */,
 				300000000000000000000002 /* RootView.swift in Sources */,
 				300000000000000000000003 /* AppEnvironment.swift in Sources */,
+				300000000000000000000006 /* AppContainer.swift in Sources */,
+				300000000000000000000007 /* AppConfiguration.swift in Sources */,
+				300000000000000000000008 /* AppError.swift in Sources */,
+				300000000000000000000009 /* AppLogger.swift in Sources */,
+				300000000000000000000010 /* HTTPClient.swift in Sources */,
+				300000000000000000000011 /* KeyValueStore.swift in Sources */,
+				300000000000000000000012 /* FoundationStatusView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		400000000000000000000004 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (300000000000000000000004 /* AppEnvironmentTests.swift in Sources */);
+			files = (
+				300000000000000000000004 /* AppEnvironmentTests.swift in Sources */,
+				300000000000000000000013 /* AppConfigurationTests.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		400000000000000000000007 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (300000000000000000000005 /* IOSFoundationUITests.swift in Sources */);
+			files = (
+				300000000000000000000005 /* IOSFoundationUITests.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -218,6 +308,7 @@
 /* Begin XCBuildConfiguration section */
 		600000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 200000000000000000000021 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -272,6 +363,7 @@
 		};
 		600000000000000000000002 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 200000000000000000000022 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -323,12 +415,12 @@
 			};
 			name = Release;
 		};
-		600000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "iOS Foundation"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
-		600000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = "iOS Foundation"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
-		600000000000000000000005 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IOSFoundation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IOSFoundation"; }; name = Debug; };
-		600000000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.tests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IOSFoundation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IOSFoundation"; }; name = Release; };
-		600000000000000000000007 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = IOSFoundation; }; name = Debug; };
-		600000000000000000000008 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_STRICT_CONCURRENCY = complete; SWIFT_VERSION = 6.0; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = IOSFoundation; }; name = Release; };
+		600000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_APP_CONFIGURATION = "$(APP_CONFIGURATION)"; INFOPLIST_KEY_CFBundleDisplayName = "iOS Foundation"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		600000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_APP_CONFIGURATION = "$(APP_CONFIGURATION)"; INFOPLIST_KEY_CFBundleDisplayName = "iOS Foundation"; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 0.1.0; PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+		600000000000000000000005 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.tests; PRODUCT_NAME = "$(TARGET_NAME)"; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IOSFoundation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IOSFoundation"; }; name = Debug; };
+		600000000000000000000006 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { BUNDLE_LOADER = "$(TEST_HOST)"; CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.tests; PRODUCT_NAME = "$(TARGET_NAME)"; TARGETED_DEVICE_FAMILY = 1; TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IOSFoundation.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IOSFoundation"; }; name = Release; };
+		600000000000000000000007 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = IOSFoundation; }; name = Debug; };
+		600000000000000000000008 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks"); PRODUCT_BUNDLE_IDENTIFIER = com.rajalarata.ios.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; TARGETED_DEVICE_FAMILY = 1; TEST_TARGET_NAME = IOSFoundation; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */

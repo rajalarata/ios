@@ -1,0 +1,45 @@
+name: Release Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-archive:
+    name: Validate unsigned device archive
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    env:
+      ARCHIVE_PATH: ${{ runner.temp }}/IOSFoundation.xcarchive
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select Xcode 26.6
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Create unsigned archive
+        run: |
+          xcodebuild archive \
+            -project IOSFoundation.xcodeproj \
+            -scheme IOSFoundation \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$ARCHIVE_PATH" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload short-lived archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unsigned-ios-archive
+          path: ${{ env.ARCHIVE_PATH }}
+          retention-days: 1
+
+# Distribution signing and App Store/TestFlight upload intentionally remain disabled.
+# They will be added only when Apple credentials are available through GitHub Secrets.

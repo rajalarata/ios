@@ -14,11 +14,16 @@ concurrency:
   group: ios-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  PROJECT: IOSFoundation.xcodeproj
+  SCHEME: IOSFoundation
+  XCODE_PATH: /Applications/Xcode_26.6.app/Contents/Developer
+
 jobs:
-  build-and-test:
-    name: Build and test
+  quality:
+    name: Quality gates
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
@@ -26,52 +31,167 @@ jobs:
 
       - name: Select Xcode 26.6
         run: |
-          sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+          sudo xcode-select --switch "$XCODE_PATH"
           xcodebuild -version
           swift --version
+          swiftformat --version
+          swiftlint version
 
-      - name: Select available iPhone simulator
-        id: simulator
+      - name: Check Swift formatting
+        run: swiftformat --lint IOSFoundation IOSFoundationTests IOSFoundationUITests --config .swiftformat
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict --config .swiftlint.yml
+
+      - name: Check repository hygiene
         shell: bash
         run: |
           set -euo pipefail
-          udid="$(xcrun simctl list devices available --json | python3 -c '
-          import json, sys
-          data = json.load(sys.stdin)
-          candidates = []
-          for runtime, devices in data["devices"].items():
-              if "iOS" not in runtime:
-                  continue
-              for device in devices:
-                  if device.get("isAvailable") and device["name"].startswith("iPhone"):
-                      candidates.append((runtime, device["name"], device["udid"]))
-          if not candidates:
-              raise SystemExit("No available iPhone simulator found")
-          print(sorted(candidates)[-1][2])
-          ' )"
-          echo "destination=platform=iOS Simulator,id=${udid}" >> "$GITHUB_OUTPUT"
+          if git ls-files | grep -E '\.(p12|cer|mobileprovision|provisionprofile|pem|key)$'; then
+            echo "Signing or key material must not be committed." >&2
+            exit 1
+          fi
+          if git ls-files | grep -E '(^|/)\.env($|\.)' | grep -v '\.env\.example$'; then
+            echo "Environment secret files must not be committed." >&2
+            exit 1
+          fi
 
-      - name: Test debug configuration
+  unit-tests:
+    name: Unit tests · iOS ${{ matrix.runtime }}
+    needs: quality
+    runs-on: macos-26
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime:
+          - "26.2"
+          - "26.5"
+
+    env:
+      RESULT_BUNDLE: ${{ runner.temp }}/UnitTests-${{ matrix.runtime }}.xcresult
+      DERIVED_DATA: ${{ runner.temp }}/DerivedData-Unit-${{ matrix.runtime }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select Xcode 26.6
+        run: sudo xcode-select --switch "$XCODE_PATH"
+
+      - name: Restore Swift package cache when dependencies exist
+        if: ${{ hashFiles('**/Package.resolved') != '' }}
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            ~/Library/Developer/Xcode/DerivedData/SourcePackages
+          key: swiftpm-${{ runner.os }}-${{ hashFiles('**/Package.resolved') }}
+
+      - name: Select simulator
+        id: simulator
+        shell: bash
+        run: echo "destination=$(scripts/ci/select-simulator.sh '${{ matrix.runtime }}')" >> "$GITHUB_OUTPUT"
+
+      - name: Run unit tests
         run: |
-          set -o pipefail
           xcodebuild test \
-            -project IOSFoundation.xcodeproj \
-            -scheme IOSFoundation \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
             -configuration Debug \
             -destination '${{ steps.simulator.outputs.destination }}' \
+            -derivedDataPath "$DERIVED_DATA" \
+            -resultBundlePath "$RESULT_BUNDLE" \
             -enableCodeCoverage YES \
-            CODE_SIGNING_ALLOWED=NO \
-            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
-            GCC_TREAT_WARNINGS_AS_ERRORS=YES
+            -only-testing:IOSFoundationTests \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Add coverage summary
+        if: success()
+        run: scripts/ci/coverage-summary.sh "$RESULT_BUNDLE"
+
+      - name: Upload failed unit-test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: unit-tests-ios-${{ matrix.runtime }}-xcresult
+          path: ${{ env.RESULT_BUNDLE }}
+          retention-days: 7
+
+  ui-tests:
+    name: UI and accessibility smoke tests · iPhone 12 mini
+    needs: quality
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    env:
+      RESULT_BUNDLE: ${{ runner.temp }}/UITests.xcresult
+      DERIVED_DATA: ${{ runner.temp }}/DerivedData-UI
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select Xcode 26.6
+        run: sudo xcode-select --switch "$XCODE_PATH"
+
+      - name: Select compact simulator
+        id: simulator
+        shell: bash
+        run: echo "destination=$(scripts/ci/select-simulator.sh '26.5' 'iPhone 12 mini')" >> "$GITHUB_OUTPUT"
+
+      - name: Run UI tests
+        run: |
+          xcodebuild test \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -destination '${{ steps.simulator.outputs.destination }}' \
+            -derivedDataPath "$DERIVED_DATA" \
+            -resultBundlePath "$RESULT_BUNDLE" \
+            -only-testing:IOSFoundationUITests \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload failed UI-test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ui-tests-iphone-12-mini-xcresult
+          path: ${{ env.RESULT_BUNDLE }}
+          retention-days: 7
+
+  release-build:
+    name: Release simulator build
+    needs: quality
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    env:
+      RESULT_BUNDLE: ${{ runner.temp }}/ReleaseBuild.xcresult
+      DERIVED_DATA: ${{ runner.temp }}/DerivedData-Release
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Select Xcode 26.6
+        run: sudo xcode-select --switch "$XCODE_PATH"
 
       - name: Build release configuration
         run: |
-          set -o pipefail
           xcodebuild build \
-            -project IOSFoundation.xcodeproj \
-            -scheme IOSFoundation \
+            -project "$PROJECT" \
+            -scheme "$SCHEME" \
             -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
-            SWIFT_TREAT_WARNINGS_AS_ERRORS=YES \
-            GCC_TREAT_WARNINGS_AS_ERRORS=YES
+            -derivedDataPath "$DERIVED_DATA" \
+            -resultBundlePath "$RESULT_BUNDLE" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload failed release-build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-build-xcresult
+          path: ${{ env.RESULT_BUNDLE }}
+          retention-days: 7

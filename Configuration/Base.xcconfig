@@ -1,0 +1,7 @@
+// Shared, non-secret build settings.
+// Never commit credentials, signing material, or environment secrets here.
+IPHONEOS_DEPLOYMENT_TARGET = 18.0
+SWIFT_VERSION = 6.0
+SWIFT_STRICT_CONCURRENCY = complete
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+GCC_TREAT_WARNINGS_AS_ERRORS = YES
