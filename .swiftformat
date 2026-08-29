@@ -4,3 +4,4 @@
 --trimwhitespace always
 --commas always
 --semicolons never
+--import-grouping testable-last,alpha

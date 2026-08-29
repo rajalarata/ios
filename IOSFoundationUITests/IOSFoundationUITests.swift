@@ -6,7 +6,7 @@ final class IOSFoundationUITests: XCTestCase {
     }
 
     @MainActor
-    func testFoundationScreenLaunches() throws {
+    func testFoundationScreenLaunches() {
         let app = makeApplication()
         app.launch()
 
@@ -19,7 +19,7 @@ final class IOSFoundationUITests: XCTestCase {
     }
 
     @MainActor
-    func testFoundationScreenAtAccessibilityTextSize() throws {
+    func testFoundationScreenAtAccessibilityTextSize() {
         let app = makeApplication(
             additionalArguments: [
                 "-UIPreferredContentSizeCategoryName",
