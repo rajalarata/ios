@@ -11,9 +11,9 @@ struct IOSFoundationApp: App {
         self.environment = environment
         self.container = container
 
-        container.logger.info(
-            "Application configured for \(container.configuration.buildEnvironment.rawValue); launch mode: \(environment.logValue)"
-        )
+        let buildEnvironment = container.configuration.buildEnvironment.rawValue
+        let launchMode = environment.logValue
+        container.logger.info("Application configured for \(buildEnvironment); launch mode: \(launchMode)")
     }
 
     var body: some Scene {
