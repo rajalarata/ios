@@ -5,6 +5,7 @@ final class IOSFoundationUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    @MainActor
     func testFoundationScreenLaunches() throws {
         let app = XCUIApplication()
         app.launchArguments += ["--ui-testing"]
