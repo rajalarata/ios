@@ -35,7 +35,32 @@ jobs:
           xcodebuild -version
           swift --version
           swiftformat --version
-          swiftlint version
+
+      - name: Ensure SwiftLint 0.65.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v swiftlint >/dev/null 2>&1; then
+            swiftlint version
+            exit 0
+          fi
+
+          archive="$RUNNER_TEMP/portable_swiftlint.zip"
+          destination="$RUNNER_TEMP/swiftlint"
+          curl --fail --location --silent --show-error \
+            https://github.com/realm/SwiftLint/releases/download/0.65.1/portable_swiftlint.zip \
+            --output "$archive"
+          echo "c1e429b0599cf1b516f369a2d9ec04eaf0e436f3c12b637df8851fa52ff694d0  $archive" | shasum -a 256 --check
+          mkdir -p "$destination"
+          unzip -q "$archive" -d "$destination"
+          swiftlint_bin="$(find "$destination" -type f -name swiftlint | head -n 1)"
+          if [[ -z "$swiftlint_bin" ]]; then
+            echo "SwiftLint executable not found in verified archive." >&2
+            exit 1
+          fi
+          chmod +x "$swiftlint_bin"
+          echo "$(dirname "$swiftlint_bin")" >> "$GITHUB_PATH"
+          "$swiftlint_bin" version
 
       - name: Check Swift formatting
         run: swiftformat --lint IOSFoundation IOSFoundationTests IOSFoundationUITests --config .swiftformat
@@ -81,7 +106,7 @@ jobs:
 
       - name: Restore Swift package cache when dependencies exist
         if: ${{ hashFiles('**/Package.resolved') != '' }}
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: |
             ~/Library/Caches/org.swift.swiftpm
@@ -112,11 +137,12 @@ jobs:
 
       - name: Upload failed unit-test diagnostics
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: unit-tests-ios-${{ matrix.runtime }}-xcresult
           path: ${{ env.RESULT_BUNDLE }}
           retention-days: 7
+          if-no-files-found: ignore
 
   ui-tests:
     name: UI and accessibility smoke tests · iPhone 12 mini
@@ -154,11 +180,12 @@ jobs:
 
       - name: Upload failed UI-test diagnostics
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: ui-tests-iphone-12-mini-xcresult
           path: ${{ env.RESULT_BUNDLE }}
           retention-days: 7
+          if-no-files-found: ignore
 
   release-build:
     name: Release simulator build
@@ -190,8 +217,9 @@ jobs:
 
       - name: Upload failed release-build diagnostics
         if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: release-build-xcresult
           path: ${{ env.RESULT_BUNDLE }}
           retention-days: 7
+          if-no-files-found: ignore
