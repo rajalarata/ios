@@ -6,20 +6,25 @@ final class IOSFoundationUITests: XCTestCase {
     }
 
     @MainActor
-    func testFoundationScreenLaunches() {
+    func testProofLedgerCreatesMatter() {
         let app = makeApplication()
         app.launch()
 
-        let title = app.staticTexts["foundation.status.title"]
-        XCTAssertTrue(title.waitForExistence(timeout: 5))
-        XCTAssertEqual(title.label, "Foundation Ready")
-        XCTAssertTrue(app.staticTexts["foundation.status.detail"].exists)
-        XCTAssertTrue(app.staticTexts["foundation.environment"].exists)
-        XCTAssertTrue(app.navigationBars["iOS Foundation"].exists)
+        XCTAssertTrue(app.navigationBars["ProofLedger"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["proofledger.empty.title"].exists)
+
+        app.buttons["proofledger.newMatter"].tap()
+        let nameField = app.textFields["proofledger.matterName"]
+        XCTAssertTrue(nameField.waitForExistence(timeout: 3))
+        nameField.tap()
+        nameField.typeText("Evidence Review")
+        app.buttons["proofledger.saveMatter"].tap()
+
+        XCTAssertTrue(app.staticTexts["Evidence Review"].waitForExistence(timeout: 3))
     }
 
     @MainActor
-    func testFoundationScreenAtAccessibilityTextSize() {
+    func testProofLedgerAtAccessibilityTextSize() {
         let app = makeApplication(
             additionalArguments: [
                 "-UIPreferredContentSizeCategoryName",
@@ -28,8 +33,8 @@ final class IOSFoundationUITests: XCTestCase {
         )
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["foundation.status.title"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["foundation.status.detail"].exists)
+        XCTAssertTrue(app.navigationBars["ProofLedger"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["proofledger.newMatter"].exists)
     }
 
     @MainActor
