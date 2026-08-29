@@ -100,8 +100,13 @@ private enum MatterSection: String, CaseIterable, Identifiable {
     case missing
     case deadlines
 
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var id: String {
+        rawValue
+    }
+
+    var title: String {
+        rawValue.capitalized
+    }
 }
 
 enum QuickAddKind: String, Identifiable {
@@ -110,8 +115,13 @@ enum QuickAddKind: String, Identifiable {
     case missing
     case deadline
 
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var id: String {
+        rawValue
+    }
+
+    var title: String {
+        rawValue.capitalized
+    }
 }
 
 private struct MatterDetailView: View {
@@ -296,7 +306,9 @@ private struct MatterDetailView: View {
                     Text(event.date, format: .dateTime.day().month().year())
                         .font(.caption.weight(.semibold))
                     Text(event.title).font(.headline)
-                    if !event.detail.isEmpty { Text(event.detail).foregroundStyle(.secondary) }
+                    if !event.detail.isEmpty {
+                        Text(event.detail).foregroundStyle(.secondary)
+                    }
                 }
             }
         }

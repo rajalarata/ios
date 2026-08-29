@@ -13,7 +13,9 @@ enum EvidenceKind: String, CaseIterable, Identifiable {
     case financial
     case other
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var title: String {
         rawValue.capitalized
@@ -39,8 +41,13 @@ enum VerificationState: String, CaseIterable, Identifiable {
     case verified
     case disputed
 
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var id: String {
+        rawValue
+    }
+
+    var title: String {
+        rawValue.capitalized
+    }
 }
 
 enum TrackingState: String, CaseIterable, Identifiable {
@@ -48,8 +55,13 @@ enum TrackingState: String, CaseIterable, Identifiable {
     case waiting
     case resolved
 
-    var id: String { rawValue }
-    var title: String { rawValue.capitalized }
+    var id: String {
+        rawValue
+    }
+
+    var title: String {
+        rawValue.capitalized
+    }
 }
 
 @Model
