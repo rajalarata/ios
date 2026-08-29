@@ -21,8 +21,8 @@ jobs:
     timeout-minutes: 35
 
     env:
-      RESULT_BUNDLE: ${{ runner.temp }}/iOS27.xcresult
-      DERIVED_DATA: ${{ runner.temp }}/DerivedData-iOS27
+      RESULT_BUNDLE: iOS27.xcresult
+      DERIVED_DATA: DerivedData-iOS27
 
     steps:
       - name: Check out repository

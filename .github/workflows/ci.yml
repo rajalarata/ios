@@ -69,8 +69,8 @@ jobs:
           - "26.5"
 
     env:
-      RESULT_BUNDLE: ${{ runner.temp }}/UnitTests-${{ matrix.runtime }}.xcresult
-      DERIVED_DATA: ${{ runner.temp }}/DerivedData-Unit-${{ matrix.runtime }}
+      RESULT_BUNDLE: UnitTests-${{ matrix.runtime }}.xcresult
+      DERIVED_DATA: DerivedData-Unit-${{ matrix.runtime }}
 
     steps:
       - name: Check out repository
@@ -125,8 +125,8 @@ jobs:
     timeout-minutes: 30
 
     env:
-      RESULT_BUNDLE: ${{ runner.temp }}/UITests.xcresult
-      DERIVED_DATA: ${{ runner.temp }}/DerivedData-UI
+      RESULT_BUNDLE: UITests.xcresult
+      DERIVED_DATA: DerivedData-UI
 
     steps:
       - name: Check out repository
@@ -167,8 +167,8 @@ jobs:
     timeout-minutes: 20
 
     env:
-      RESULT_BUNDLE: ${{ runner.temp }}/ReleaseBuild.xcresult
-      DERIVED_DATA: ${{ runner.temp }}/DerivedData-Release
+      RESULT_BUNDLE: ReleaseBuild.xcresult
+      DERIVED_DATA: DerivedData-Release
 
     steps:
       - name: Check out repository
