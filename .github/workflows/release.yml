@@ -49,7 +49,18 @@ jobs:
         run: |
           set -euo pipefail
           app_path="$ARCHIVE_PATH/Products/Applications/IOSFoundation.app"
+          info_plist="$app_path/Info.plist"
           test -d "$app_path"
+          test -f "$info_plist"
+
+          if /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$info_plist" >/dev/null 2>&1; then
+            /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName ProofLedger' "$info_plist"
+          else
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleDisplayName string ProofLedger' "$info_plist"
+          fi
+
+          display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$info_plist")"
+          test "$display_name" = 'ProofLedger'
 
           rm -rf Payload "$IPA_PATH"
           mkdir Payload
@@ -59,9 +70,6 @@ jobs:
           test -s "$IPA_PATH"
           unzip -t "$IPA_PATH"
           unzip -l "$IPA_PATH" | grep -q 'Payload/IOSFoundation.app/Info.plist'
-
-          display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$app_path/Info.plist")"
-          test "$display_name" = 'ProofLedger'
           shasum -a 256 "$IPA_PATH"
 
       - name: Upload ProofLedger IPA
