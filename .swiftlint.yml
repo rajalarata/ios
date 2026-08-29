@@ -1,0 +1,23 @@
+strict: true
+
+included:
+  - IOSFoundation
+  - IOSFoundationTests
+  - IOSFoundationUITests
+
+reporter: xcode
+
+line_length:
+  warning: 120
+  error: 140
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  min_length: 2
+
+nesting:
+  type_level: 2
+
+trailing_comma:
+  mandatory_comma: true
