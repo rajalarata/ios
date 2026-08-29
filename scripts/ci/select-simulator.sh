@@ -21,7 +21,9 @@ else
   runtime_identifier="com.apple.CoreSimulator.SimRuntime.iOS-${runtime_version//./-}"
 fi
 
-udid="$(python3 -c '
+select_existing() {
+  local preferred="$1"
+  python3 -c '
 import json, sys
 runtime = sys.argv[1]
 preferred = sys.argv[2]
@@ -31,14 +33,22 @@ if preferred:
     exact = [device for device in devices if device.get("isAvailable") and device["name"] == preferred]
     if exact:
         print(exact[0]["udid"])
-        raise SystemExit
+    raise SystemExit
 iphones = [device for device in devices if device.get("isAvailable") and device["name"].startswith("iPhone")]
 if iphones:
     print(iphones[0]["udid"])
-' "$runtime_identifier" "$preferred_device" <<< "$json")"
+' "$runtime_identifier" "$preferred" <<< "$json"
+}
 
-if [[ -z "$udid" && -n "$preferred_device" ]] && xcrun simctl list devicetypes | grep -Fq "$preferred_device"; then
-  udid="$(xcrun simctl create "CI ${preferred_device}" "$preferred_device" "$runtime_identifier")"
+udid="$(select_existing "$preferred_device")"
+
+if [[ -z "$udid" && -n "$preferred_device" ]]; then
+  if xcrun simctl list devicetypes | grep -Fq "$preferred_device"; then
+    udid="$(xcrun simctl create "CI ${preferred_device}" "$preferred_device" "$runtime_identifier")"
+  else
+    echo "Preferred simulator '${preferred_device}' is unavailable; falling back to another iPhone." >&2
+    udid="$(select_existing "")"
+  fi
 fi
 
 if [[ -z "$udid" ]]; then

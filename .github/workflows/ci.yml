@@ -63,7 +63,7 @@ jobs:
           "$swiftlint_bin" version
 
       - name: Check Swift formatting
-        run: swiftformat --lint IOSFoundation IOSFoundationTests IOSFoundationUITests --config .swiftformat
+        run: swiftformat IOSFoundation IOSFoundationTests IOSFoundationUITests --lint --config .swiftformat
 
       - name: Run SwiftLint
         run: swiftlint lint --strict --config .swiftlint.yml
