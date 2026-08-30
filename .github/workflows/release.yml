@@ -1,6 +1,9 @@
 name: Release Validation
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -13,12 +16,13 @@ concurrency:
 
 jobs:
   unsigned-archive:
-    name: Validate unsigned device archive
+    name: Build SideStore-ready IPA
     runs-on: macos-26
     timeout-minutes: 30
 
     env:
       ARCHIVE_PATH: IOSFoundation.xcarchive
+      IPA_PATH: ProofLedger.ipa
 
     steps:
       - name: Check out repository
@@ -31,7 +35,7 @@ jobs:
           sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
           xcodebuild -version
 
-      - name: Create unsigned archive
+      - name: Create unsigned device archive
         run: |
           xcodebuild archive \
             -project IOSFoundation.xcodeproj \
@@ -41,6 +45,41 @@ jobs:
             -archivePath "$ARCHIVE_PATH" \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Package SideStore-ready IPA
+        run: |
+          set -euo pipefail
+          app_path="$ARCHIVE_PATH/Products/Applications/IOSFoundation.app"
+          info_plist="$app_path/Info.plist"
+          test -d "$app_path"
+          test -f "$info_plist"
+
+          if /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$info_plist" >/dev/null 2>&1; then
+            /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName ProofLedger' "$info_plist"
+          else
+            /usr/libexec/PlistBuddy -c 'Add :CFBundleDisplayName string ProofLedger' "$info_plist"
+          fi
+
+          display_name="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$info_plist")"
+          test "$display_name" = 'ProofLedger'
+
+          rm -rf Payload "$IPA_PATH"
+          mkdir Payload
+          cp -R "$app_path" Payload/
+          zip -qry "$IPA_PATH" Payload
+
+          test -s "$IPA_PATH"
+          unzip -t "$IPA_PATH"
+          unzip -l "$IPA_PATH" | grep -q 'Payload/IOSFoundation.app/Info.plist'
+          shasum -a 256 "$IPA_PATH"
+
+      - name: Upload ProofLedger IPA
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: ProofLedger-SideStore-IPA
+          path: ${{ env.IPA_PATH }}
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Upload short-lived archive
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
@@ -48,5 +87,5 @@ jobs:
           path: ${{ env.ARCHIVE_PATH }}
           retention-days: 1
 
-# Distribution signing and App Store/TestFlight upload intentionally remain disabled.
-# They will be added only when Apple credentials are available through GitHub Secrets.
+# SideStore performs personal-development signing on the iPhone.
+# App Store/TestFlight signing remains intentionally disabled until Apple credentials are available.

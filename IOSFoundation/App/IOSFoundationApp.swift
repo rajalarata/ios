@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 @main
@@ -20,5 +21,16 @@ struct IOSFoundationApp: App {
         WindowGroup {
             RootView(environment: environment, container: container)
         }
+        .modelContainer(
+            for: [
+                Matter.self,
+                EvidenceRecord.self,
+                TimelineRecord.self,
+                IssueRecord.self,
+                MissingEvidenceRecord.self,
+                DeadlineRecord.self,
+            ],
+            inMemory: environment == .uiTesting
+        )
     }
 }
