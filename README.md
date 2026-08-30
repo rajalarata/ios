@@ -22,11 +22,54 @@ IOSFoundation/
 ├── App/                 # App lifecycle, composition root, launch environment
 ├── Core/                # Configuration, errors, logging
 ├── Features/            # Product-facing feature modules
-├── Services/            # Networking and persistence boundaries
+├── Services/            # Networking, authentication, persistence boundaries
 └── Resources/           # Future assets/localization/resources
 ```
 
 `AppContainer` is the dependency injection boundary. Networking uses `URLSession` behind `HTTPClient`; persistence uses an actor-backed `UserDefaultsStore` behind `KeyValueStore`; logging uses unified logging behind `AppLogging`.
+
+## Authentication foundation
+
+Authentication is provider-neutral until a real backend or identity provider is selected. No fake login endpoint, OAuth client secret, API key, or user credential is committed.
+
+The current authentication components are:
+
+- `AuthTokens`: access token, optional refresh token, and access-token expiry.
+- `CredentialStore`: secure-token persistence boundary.
+- `KeychainCredentialStore`: live Keychain implementation using device-only, after-first-unlock accessibility.
+- `TokenRefreshing`: provider-neutral refresh boundary to be implemented by the future backend integration.
+- `AuthenticationSession`: actor-isolated access-token validation, refresh, persistence, and sign-out.
+- `AuthenticatedHTTPClient`: wraps an `HTTPClient`, authenticates only explicitly approved HTTPS hosts, replaces stale `Authorization` headers, and performs at most one forced refresh/retry after HTTP 401.
+
+Request flow:
+
+```text
+Feature
+  │ URLRequest
+  ▼
+AuthenticatedHTTPClient
+  ├─ require HTTPS
+  ├─ require allowed host
+  │
+  ▼
+AuthenticationSession
+  ├─ load AuthTokens from CredentialStore
+  ├─ return current access token, or
+  └─ refresh expired token through TokenRefreshing
+  │
+  ▼
+Authorization: Bearer <access token>
+  │
+  ▼
+HTTPClient / URLSession
+  │
+  ├─ success → response
+  └─ 401 → force refresh → retry once → surface result
+```
+
+Tokens must be stored in Keychain, never `UserDefaults`. Token values must not be logged, placed in `Info.plist`/`.xcconfig`, committed to Git, or included in analytics. Logout deletes the stored Keychain record.
+
+A future provider integration should implement `TokenRefreshing` and the initial sign-in/exchange boundary. If an identity protocol requires a confidential client secret, that secret belongs on trusted server infrastructure rather than inside the iOS application bundle.
 
 ## Configuration
 
@@ -41,6 +84,7 @@ Never put credentials in `.xcconfig` files. Signing material and secrets belong 
 - SwiftFormat lint mode.
 - SwiftLint strict mode.
 - repository secret/signing-file hygiene checks.
+- checkout credentials are not persisted after repository checkout.
 - Swift Testing on iOS 26.2 and iOS 26.5 simulators.
 - code coverage summaries using Apple's `xccov` tooling.
 - UI and accessibility smoke tests on the iPhone 12 mini form factor when that simulator type is available.
