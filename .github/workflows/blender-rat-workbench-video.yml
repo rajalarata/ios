@@ -1,0 +1,52 @@
+name: Blender Rat Workbench Video
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/blender-rat-workbench-video.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  render-workbench-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-6 libxxf86vm1 libxfixes3 libxi6 libxrender1 libgl1 libegl1 libxkbcommon0
+      - name: Download validated refined rat artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: rajalarata/ios
+          run-id: 33322128755
+          name: blender-rat-production-step1
+          path: out
+      - name: Download Blender 4.5.13 LTS
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -fL --retry 5 --retry-delay 3 -o blender.tar.xz 'https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz'
+          mkdir blender
+          tar -xJf blender.tar.xz -C blender --strip-components=1
+      - name: Render Workbench rat video
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/render_rat_video_workbench.py -- --out "$GITHUB_WORKSPACE/out"
+          test -s out/rat-production-workbench.mp4
+          ls -lh out/rat-production-workbench.mp4
+      - name: Upload rat Workbench video
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-rat-workbench-video
+          path: out/rat-production-workbench.mp4
+          if-no-files-found: error
+          retention-days: 14
