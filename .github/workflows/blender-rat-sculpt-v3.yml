@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'experiments/remotion-rat-blender/refine_rat_v3.py'
+      - 'experiments/remotion-rat-blender/refine_rat_v3_world.py'
       - 'experiments/remotion-rat-blender/validate_sculpt_v3.py'
       - '.github/workflows/blender-rat-sculpt-v3.yml'
 
@@ -34,6 +35,12 @@ jobs:
           name: blender-rat-production-step1
           path: out
 
+      - name: Verify scripts compile
+        run: |
+          python -m py_compile experiments/remotion-rat-blender/refine_rat_v3.py
+          python -m py_compile experiments/remotion-rat-blender/refine_rat_v3_world.py
+          python -m py_compile experiments/remotion-rat-blender/validate_sculpt_v3.py
+
       - name: Verify red gate against pass 2
         shell: bash
         run: |
@@ -60,7 +67,25 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/refine_rat_v3.py -- --out "$GITHUB_WORKSPACE/out"
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/refine_rat_v3_world.py -- --out "$GITHUB_WORKSPACE/out"
+
+      - name: Upload candidate QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-rat-sculpt-v3-candidate
+          path: |
+            out/rat-production-v3.blend
+            out/rat-production-v3.glb
+            out/rat-production-manifest.json
+            out/rat-v3-front.png
+            out/rat-v3-three-quarter.png
+            out/rat-v3-side.png
+            out/rat-v3-back.png
+            out/rat-v3-face.png
+            out/rat-v3-hero.png
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Verify green sculpt gate
         run: python experiments/remotion-rat-blender/validate_sculpt_v3.py out/rat-production-manifest.json
@@ -80,7 +105,7 @@ jobs:
           ls -lh out/rat-production-v3.blend out/rat-production-v3.glb out/rat-v3-*.png
           cat out/rat-production-manifest.json
 
-      - name: Upload sculpt v3 asset
+      - name: Upload accepted sculpt v3 asset
         uses: actions/upload-artifact@v4
         with:
           name: blender-rat-sculpt-v3
