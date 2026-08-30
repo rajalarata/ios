@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/blender-rat-workbench-video.yml'
+      - 'experiments/remotion-rat-blender/render_rat_video_workbench.py'
 
 permissions:
   actions: read
