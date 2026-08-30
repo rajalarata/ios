@@ -1,0 +1,71 @@
+name: Blender Rat Step 1
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'experiments/remotion-rat-blender/**'
+      - '.github/workflows/blender-rat-step1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-rat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-6 libxxf86vm1 libxfixes3 libxi6 libxrender1 libgl1 libegl1 libxkbcommon0
+
+      - name: Download Blender 4.5.13 LTS
+        shell: bash
+        run: |
+          set -euxo pipefail
+          URL='https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz'
+          curl -fL --retry 5 --retry-delay 3 -o blender.tar.xz "$URL"
+          mkdir blender
+          tar -xJf blender.tar.xz -C blender --strip-components=1
+          ./blender/blender --version | head -3
+
+      - name: Build and render production rat
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p out
+          ./blender/blender -b --python experiments/remotion-rat-blender/build_rat.py -- --out "$GITHUB_WORKSPACE/out"
+
+      - name: Validate manifest
+        run: python experiments/remotion-rat-blender/validate_manifest.py out/rat-production-manifest.json
+
+      - name: Show outputs
+        run: |
+          ls -lh out
+          test -s out/rat-production.blend
+          test -s out/rat-production.glb
+          test -s out/rat-front.png
+          test -s out/rat-three-quarter.png
+          test -s out/rat-side.png
+          test -s out/rat-back.png
+          test -s out/rat-face.png
+
+      - name: Upload Blender rat assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-rat-production-step1
+          path: |
+            out/rat-production.blend
+            out/rat-production.glb
+            out/rat-production-manifest.json
+            out/rat-front.png
+            out/rat-three-quarter.png
+            out/rat-side.png
+            out/rat-back.png
+            out/rat-face.png
+          if-no-files-found: error
+          retention-days: 14
