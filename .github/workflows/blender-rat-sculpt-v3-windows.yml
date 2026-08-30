@@ -31,8 +31,10 @@ jobs:
         shell: pwsh
         run: |
           python experiments/remotion-rat-blender/validate_sculpt_v3.py out/rat-production-manifest.json
-          if ($LASTEXITCODE -eq 0) { throw 'Expected pass-2 asset to fail sculpt-v3 gate.' }
-          Write-Host 'RED gate confirmed.'
+          $code = $LASTEXITCODE
+          if ($code -eq 0) { throw 'Expected pass-2 asset to fail sculpt-v3 gate.' }
+          Write-Host "RED gate confirmed with expected validator exit code $code."
+          exit 0
 
       - name: Download Blender 4.5.13 LTS
         shell: pwsh
