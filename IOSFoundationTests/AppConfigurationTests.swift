@@ -78,7 +78,11 @@ struct AuthenticationSessionTests {
 
     @Test("Current access token is returned without refresh")
     func currentToken() async throws {
-        let tokens = AuthTokens(accessToken: "current-access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
+        let tokens = AuthTokens(
+            accessToken: "current-access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
         let store = MemoryCredentialStore(tokens: tokens)
         let refresher = RecordingTokenRefresher(result: .success(tokens))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
@@ -91,8 +95,16 @@ struct AuthenticationSessionTests {
 
     @Test("Expired access token refreshes and persists replacement")
     func expiredTokenRefreshes() async throws {
-        let expired = AuthTokens(accessToken: "expired-access", refreshToken: "refresh-one", expiresAt: now.addingTimeInterval(-1))
-        let replacement = AuthTokens(accessToken: "replacement-access", refreshToken: "refresh-two", expiresAt: now.addingTimeInterval(900))
+        let expired = AuthTokens(
+            accessToken: "expired-access",
+            refreshToken: "refresh-one",
+            expiresAt: now.addingTimeInterval(-1)
+        )
+        let replacement = AuthTokens(
+            accessToken: "replacement-access",
+            refreshToken: "refresh-two",
+            expiresAt: now.addingTimeInterval(900)
+        )
         let store = MemoryCredentialStore(tokens: expired)
         let refresher = RecordingTokenRefresher(result: .success(replacement))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
@@ -106,19 +118,27 @@ struct AuthenticationSessionTests {
 
     @Test("Expired credentials without refresh token fail closed")
     func expiredWithoutRefreshFails() async {
-        let expired = AuthTokens(accessToken: "expired-access", refreshToken: nil, expiresAt: now.addingTimeInterval(-1))
+        let expired = AuthTokens(
+            accessToken: "expired-access",
+            refreshToken: nil,
+            expiresAt: now.addingTimeInterval(-1)
+        )
         let store = MemoryCredentialStore(tokens: expired)
-        let refresher = RecordingTokenRefresher(result: .failure(AuthenticationError.refreshUnavailable))
+        let refresher = RecordingTokenRefresher(result: .failure(.refreshUnavailable))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
 
         await #expect(throws: AuthenticationError.refreshUnavailable) {
-            _ = try await session.validAccessToken()
+            try await _ = session.validAccessToken()
         }
     }
 
     @Test("Sign out clears stored credentials")
     func signOutClearsCredentials() async throws {
-        let tokens = AuthTokens(accessToken: "access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
+        let tokens = AuthTokens(
+            accessToken: "access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
         let store = MemoryCredentialStore(tokens: tokens)
         let refresher = RecordingTokenRefresher(result: .success(tokens))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
@@ -135,16 +155,21 @@ struct AuthenticatedHTTPClientTests {
 
     @Test("Bearer token replaces any stale Authorization header")
     func bearerHeader() async throws {
-        let tokens = AuthTokens(accessToken: "fresh-access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
+        let tokens = AuthTokens(
+            accessToken: "fresh-access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
         let store = MemoryCredentialStore(tokens: tokens)
         let refresher = RecordingTokenRefresher(result: .success(tokens))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
         let transport = RecordingHTTPClient(statuses: [200])
         let client = AuthenticatedHTTPClient(base: transport, session: session, allowedHosts: ["api.example.com"])
-        var request = URLRequest(url: URL(string: "https://api.example.com/private")!)
+        let url = try #require(URL(string: "https://api.example.com/private"))
+        var request = URLRequest(url: url)
         request.setValue("Bearer stale", forHTTPHeaderField: "Authorization")
 
-        _ = try await client.data(for: request)
+        try await _ = client.data(for: request)
 
         let sent = await transport.requests
         #expect(sent.count == 1)
@@ -152,37 +177,48 @@ struct AuthenticatedHTTPClientTests {
     }
 
     @Test("Credentials are never attached to an insecure request")
-    func rejectsHTTP() async {
+    func rejectsHTTP() async throws {
         let client = makeClient(statuses: [200])
-        let request = URLRequest(url: URL(string: "http://api.example.com/private")!)
+        let url = try #require(URL(string: "http://api.example.com/private"))
+        let request = URLRequest(url: url)
 
         await #expect(throws: AuthenticationError.insecureRequest) {
-            _ = try await client.data(for: request)
+            try await _ = client.data(for: request)
         }
     }
 
     @Test("Credentials are restricted to approved hosts")
-    func rejectsUnapprovedHost() async {
+    func rejectsUnapprovedHost() async throws {
         let client = makeClient(statuses: [200])
-        let request = URLRequest(url: URL(string: "https://evil.example/private")!)
+        let url = try #require(URL(string: "https://evil.example/private"))
+        let request = URLRequest(url: url)
 
         await #expect(throws: AuthenticationError.unapprovedHost) {
-            _ = try await client.data(for: request)
+            try await _ = client.data(for: request)
         }
     }
 
     @Test("401 refreshes once and retries with replacement token")
     func refreshesAfter401() async throws {
-        let current = AuthTokens(accessToken: "old-access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
-        let replacement = AuthTokens(accessToken: "new-access", refreshToken: "refresh-2", expiresAt: now.addingTimeInterval(900))
+        let current = AuthTokens(
+            accessToken: "old-access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
+        let replacement = AuthTokens(
+            accessToken: "new-access",
+            refreshToken: "refresh-2",
+            expiresAt: now.addingTimeInterval(900)
+        )
         let store = MemoryCredentialStore(tokens: current)
         let refresher = RecordingTokenRefresher(result: .success(replacement))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
         let transport = RecordingHTTPClient(statuses: [401, 200])
         let client = AuthenticatedHTTPClient(base: transport, session: session, allowedHosts: ["api.example.com"])
-        let request = URLRequest(url: URL(string: "https://api.example.com/private")!)
+        let url = try #require(URL(string: "https://api.example.com/private"))
+        let request = URLRequest(url: url)
 
-        _ = try await client.data(for: request)
+        try await _ = client.data(for: request)
 
         let sent = await transport.requests
         #expect(sent.count == 2)
@@ -192,18 +228,27 @@ struct AuthenticatedHTTPClientTests {
     }
 
     @Test("Second 401 is surfaced without an authentication loop")
-    func onlyRetriesOnce() async {
-        let current = AuthTokens(accessToken: "old-access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
-        let replacement = AuthTokens(accessToken: "new-access", refreshToken: "refresh-2", expiresAt: now.addingTimeInterval(900))
+    func onlyRetriesOnce() async throws {
+        let current = AuthTokens(
+            accessToken: "old-access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
+        let replacement = AuthTokens(
+            accessToken: "new-access",
+            refreshToken: "refresh-2",
+            expiresAt: now.addingTimeInterval(900)
+        )
         let store = MemoryCredentialStore(tokens: current)
         let refresher = RecordingTokenRefresher(result: .success(replacement))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
         let transport = RecordingHTTPClient(statuses: [401, 401])
         let client = AuthenticatedHTTPClient(base: transport, session: session, allowedHosts: ["api.example.com"])
-        let request = URLRequest(url: URL(string: "https://api.example.com/private")!)
+        let url = try #require(URL(string: "https://api.example.com/private"))
+        let request = URLRequest(url: url)
 
         await #expect(throws: AppError.unexpectedHTTPStatus(401)) {
-            _ = try await client.data(for: request)
+            try await _ = client.data(for: request)
         }
 
         #expect(await transport.requests.count == 2)
@@ -211,11 +256,19 @@ struct AuthenticatedHTTPClientTests {
     }
 
     private func makeClient(statuses: [Int]) -> AuthenticatedHTTPClient {
-        let tokens = AuthTokens(accessToken: "access", refreshToken: "refresh", expiresAt: now.addingTimeInterval(600))
+        let tokens = AuthTokens(
+            accessToken: "access",
+            refreshToken: "refresh",
+            expiresAt: now.addingTimeInterval(600)
+        )
         let store = MemoryCredentialStore(tokens: tokens)
         let refresher = RecordingTokenRefresher(result: .success(tokens))
         let session = AuthenticationSession(store: store, refresher: refresher, now: { now })
-        return AuthenticatedHTTPClient(base: RecordingHTTPClient(statuses: statuses), session: session, allowedHosts: ["api.example.com"])
+        return AuthenticatedHTTPClient(
+            base: RecordingHTTPClient(statuses: statuses),
+            session: session,
+            allowedHosts: ["api.example.com"]
+        )
     }
 }
 
@@ -226,17 +279,25 @@ actor MemoryCredentialStore: CredentialStore {
         self.tokens = tokens
     }
 
-    func load() -> AuthTokens? { tokens }
-    func save(_ tokens: AuthTokens) { self.tokens = tokens }
-    func clear() { tokens = nil }
+    func load() -> AuthTokens? {
+        tokens
+    }
+
+    func save(_ tokens: AuthTokens) {
+        self.tokens = tokens
+    }
+
+    func clear() {
+        tokens = nil
+    }
 }
 
 actor RecordingTokenRefresher: TokenRefreshing {
-    private let result: Result<AuthTokens, Error>
+    private let result: Result<AuthTokens, AuthenticationError>
     private(set) var callCount = 0
     private(set) var lastRefreshToken: String?
 
-    init(result: Result<AuthTokens, Error>) {
+    init(result: Result<AuthTokens, AuthenticationError>) {
         self.result = result
     }
 
@@ -261,7 +322,11 @@ actor RecordingHTTPClient: HTTPClient {
         guard status != 401 else {
             throw AppError.unexpectedHTTPStatus(401)
         }
-        let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!
+        guard let url = request.url,
+              let response = HTTPURLResponse(url: url, statusCode: status, httpVersion: nil, headerFields: nil)
+        else {
+            throw AppError.invalidResponse
+        }
         return (Data(), response)
     }
 }
