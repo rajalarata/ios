@@ -12,6 +12,7 @@ def bounds(points):
         'z': (min(p.z for p in points), max(p.z for p in points)),
     }
 
+print('VERTEX_COUNT', len(local))
 print('BODY_MATRIX_WORLD')
 print(body.matrix_world)
 print('LOCAL_BOUNDS', bounds(local))
