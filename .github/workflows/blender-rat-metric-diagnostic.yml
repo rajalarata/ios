@@ -1,0 +1,39 @@
+name: Blender Rat Metric Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'experiments/remotion-rat-blender/diagnose_rat_metric_space.py'
+      - '.github/workflows/blender-rat-metric-diagnostic.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  diagnose-metrics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-6 libxxf86vm1 libxfixes3 libxi6 libxrender1 libgl1 libegl1 libxkbcommon0
+      - name: Download validated pass-2 Blender asset
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: rajalarata/ios
+          run-id: 33322128755
+          name: blender-rat-production-step1
+          path: out
+      - name: Download Blender 4.5.13 LTS
+        run: |
+          curl -fL --retry 5 --retry-delay 3 -o blender.tar.xz 'https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz'
+          mkdir blender
+          tar -xJf blender.tar.xz -C blender --strip-components=1
+      - name: Diagnose coordinate spaces
+        run: |
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/diagnose_rat_metric_space.py
