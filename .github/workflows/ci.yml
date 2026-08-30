@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Select Xcode 26.6
         run: |
@@ -80,6 +82,10 @@ jobs:
             echo "Environment secret files must not be committed." >&2
             exit 1
           fi
+          if git grep -I -q -E -- '-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|(^|[^A-Za-z0-9_])(API_KEY|ACCESS_TOKEN|REFRESH_TOKEN|CLIENT_SECRET)[[:space:]]*=' -- .; then
+            echo "Possible committed credential material detected. Inspect locally; CI will not print matching values." >&2
+            exit 1
+          fi
 
   unit-tests:
     name: Unit tests · iOS ${{ matrix.runtime }}
@@ -100,6 +106,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Select Xcode 26.6
         run: sudo xcode-select --switch "$XCODE_PATH"
@@ -157,6 +165,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Select Xcode 26.6
         run: sudo xcode-select --switch "$XCODE_PATH"
@@ -200,6 +210,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Select Xcode 26.6
         run: sudo xcode-select --switch "$XCODE_PATH"
