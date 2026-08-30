@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-rat:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,6 +46,12 @@ jobs:
           set -euxo pipefail
           ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/refine_rat.py -- --out "$GITHUB_WORKSPACE/out"
 
+      - name: Render cinematic rat video
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/render_rat_video.py -- --out "$GITHUB_WORKSPACE/out"
+
       - name: Validate manifest
         run: python experiments/remotion-rat-blender/validate_manifest.py out/rat-production-manifest.json
 
@@ -54,6 +60,8 @@ jobs:
           ls -lh out
           test -s out/rat-production.blend
           test -s out/rat-production.glb
+          test -s out/rat-production-animated.blend
+          test -s out/rat-production-cinematic.mp4
           test -s out/rat-front.png
           test -s out/rat-three-quarter.png
           test -s out/rat-side.png
@@ -68,6 +76,8 @@ jobs:
           path: |
             out/rat-production.blend
             out/rat-production.glb
+            out/rat-production-animated.blend
+            out/rat-production-cinematic.mp4
             out/rat-production-manifest.json
             out/rat-front.png
             out/rat-three-quarter.png
