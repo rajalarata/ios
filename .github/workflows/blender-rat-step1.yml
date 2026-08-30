@@ -33,12 +33,18 @@ jobs:
           tar -xJf blender.tar.xz -C blender --strip-components=1
           ./blender/blender --version | head -3
 
-      - name: Build and render production rat
+      - name: Build production rat foundation
         shell: bash
         run: |
           set -euxo pipefail
           mkdir -p out
           ./blender/blender -b --python experiments/remotion-rat-blender/build_rat.py -- --out "$GITHUB_WORKSPACE/out"
+
+      - name: Refine sculpt and materials in Blender
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/refine_rat.py -- --out "$GITHUB_WORKSPACE/out"
 
       - name: Validate manifest
         run: python experiments/remotion-rat-blender/validate_manifest.py out/rat-production-manifest.json
@@ -53,6 +59,7 @@ jobs:
           test -s out/rat-side.png
           test -s out/rat-back.png
           test -s out/rat-face.png
+          test -s out/rat-hero.png
 
       - name: Upload Blender rat assets
         uses: actions/upload-artifact@v4
@@ -67,5 +74,6 @@ jobs:
             out/rat-side.png
             out/rat-back.png
             out/rat-face.png
+            out/rat-hero.png
           if-no-files-found: error
           retention-days: 14
