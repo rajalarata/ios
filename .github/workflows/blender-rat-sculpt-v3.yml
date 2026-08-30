@@ -1,0 +1,98 @@
+name: Blender Rat Sculpt V3
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'experiments/remotion-rat-blender/refine_rat_v3.py'
+      - 'experiments/remotion-rat-blender/validate_sculpt_v3.py'
+      - '.github/workflows/blender-rat-sculpt-v3.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  sculpt-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-6 libxxf86vm1 libxfixes3 libxi6 libxrender1 libgl1 libegl1 libxkbcommon0
+
+      - name: Download validated refinement-pass-2 Blender asset
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: rajalarata/ios
+          run-id: 33322128755
+          name: blender-rat-production-step1
+          path: out
+
+      - name: Verify red gate against pass 2
+        shell: bash
+        run: |
+          set +e
+          python experiments/remotion-rat-blender/validate_sculpt_v3.py out/rat-production-manifest.json
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo 'Expected pass-2 asset to fail the v3 sculpt gate.'
+            exit 1
+          fi
+          echo 'RED gate confirmed: pass 2 does not meet sculpt v3 requirements.'
+
+      - name: Download Blender 4.5.13 LTS
+        shell: bash
+        run: |
+          set -euxo pipefail
+          curl -fL --retry 5 --retry-delay 3 -o blender.tar.xz 'https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz'
+          mkdir blender
+          tar -xJf blender.tar.xz -C blender --strip-components=1
+          ./blender/blender --version | head -3
+
+      - name: Refine sculpt v3 in Blender
+        shell: bash
+        run: |
+          set -euxo pipefail
+          ./blender/blender -b out/rat-production.blend --python experiments/remotion-rat-blender/refine_rat_v3.py -- --out "$GITHUB_WORKSPACE/out"
+
+      - name: Verify green sculpt gate
+        run: python experiments/remotion-rat-blender/validate_sculpt_v3.py out/rat-production-manifest.json
+
+      - name: Validate outputs
+        shell: bash
+        run: |
+          set -euxo pipefail
+          test -s out/rat-production-v3.blend
+          test -s out/rat-production-v3.glb
+          test -s out/rat-v3-front.png
+          test -s out/rat-v3-three-quarter.png
+          test -s out/rat-v3-side.png
+          test -s out/rat-v3-back.png
+          test -s out/rat-v3-face.png
+          test -s out/rat-v3-hero.png
+          ls -lh out/rat-production-v3.blend out/rat-production-v3.glb out/rat-v3-*.png
+          cat out/rat-production-manifest.json
+
+      - name: Upload sculpt v3 asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: blender-rat-sculpt-v3
+          path: |
+            out/rat-production-v3.blend
+            out/rat-production-v3.glb
+            out/rat-production-manifest.json
+            out/rat-v3-front.png
+            out/rat-v3-three-quarter.png
+            out/rat-v3-side.png
+            out/rat-v3-back.png
+            out/rat-v3-face.png
+            out/rat-v3-hero.png
+          if-no-files-found: error
+          retention-days: 14
