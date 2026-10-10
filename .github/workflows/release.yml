@@ -73,7 +73,7 @@ jobs:
           shasum -a 256 "$IPA_PATH"
 
       - name: Upload ProofLedger IPA
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ProofLedger-SideStore-IPA
           path: ${{ env.IPA_PATH }}
@@ -81,7 +81,7 @@ jobs:
           retention-days: 30
 
       - name: Upload short-lived archive
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unsigned-ios-archive
           path: ${{ env.ARCHIVE_PATH }}
